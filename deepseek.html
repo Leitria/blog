@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>DeepSeek → Obsidian 格式转换器</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 20px;
+            background: #1e1e2f;
+            color: #cdd6f4;
+        }
+        textarea {
+            width: 100%;
+            height: 300px;
+            margin: 10px 0;
+            padding: 12px;
+            font-family: monospace;
+            font-size: 14px;
+            background: #11111b;
+            color: #cdd6f4;
+            border: 1px solid #313244;
+            border-radius: 8px;
+            resize: vertical;
+        }
+        button {
+            background: #89b4fa;
+            color: #1e1e2f;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #b4befe;
+        }
+        .preview {
+            background: #11111b;
+            border: 1px solid #313244;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            max-height: 400px;
+            overflow: auto;
+        }
+        .status {
+            color: #a6e3a1;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        h1, h2 {
+            color: #f5c2e7;
+        }
+        hr {
+            border-color: #313244;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <h1>🔧 DeepSeek → Obsidian 格式转换器</h1>
+    <p>从DeepSeek复制内容，粘贴到下方，点击转换，然后粘贴到Obsidian。</p>
+    
+    <textarea id="input" placeholder="从DeepSeek复制的内容粘贴到这里..."></textarea>
+    
+    <div>
+        <button onclick="convertAndCopy()">✨ 转换并复制（纯文本）</button>
+        <button onclick="convertToMarkdown()">📄 仅转换为Markdown预览</button>
+        <button onclick="clearAll()">🗑️ 清空</button>
+    </div>
+    
+    <div id="preview" class="preview" style="display:none;"></div>
+    <div id="status" class="status"></div>
+    
+    <hr>
+    <h2>使用说明</h2>
+    <ul>
+        <li><strong>方法1</strong>：直接粘贴DeepSeek内容，点击"转换并复制"，然后到Obsidian按 <kbd>Ctrl+V</kbd>（Mac: <kbd>Cmd+V</kbd>）</li>
+        <li><strong>方法2</strong>：如果想看效果，点击"仅转换为Markdown预览"</li>
+        <li><strong>处理规则</strong>：自动清理多余的HTML标签、统一换行符、保留Markdown语法</li>
+    </ul>
+    
+    <script>
+        // 核心转换函数：将DeepSeek的HTML/Markdown混合内容标准化
+        function cleanContent(raw) {
+            if (!raw) return '';
+            
+            let text = raw;
+            
+            // 1. 先尝试提取Markdown内容（如果粘贴的是HTML，可能会有隐藏结构）
+            // 创建一个临时div来解析HTML
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = text;
+            
+            // 如果包含HTML标签，说明是富文本复制，需要提取文本结构和Markdown
+            if (/<[a-z][\s\S]*>/i.test(text)) {
+                // 提取代码块内容（处理highlight.js的span）
+                const codeBlocks = tempDiv.querySelectorAll('pre code, pre');
+                codeBlocks.forEach(block => {
+                    const code = block.textContent;
+                    // 用markdown代码块包裹
+                    const lang = block.className.match(/language-(\w+)/)?.[1] || '';
+                    const replacement = `\n\`\`\`${lang}\n${code.trim()}\n\`\`\`\n`;
+                    text = text.replace(block.outerHTML, replacement);
+                });
+                
+                // 提取普通文本，保留换行
+                text = tempDiv.textContent || text;
+            }
+            
+            // 2. 统一换行符
+            text = text.replace(/\r\n/g, '\n');
+            
+            // 3. 修复连续空行（Obsidian中多个空行会被合并，保留两个空行即可）
+            text = text.replace(/\n{3,}/g, '\n\n');
+            
+            // 4. 修复列表项（确保-后面有空格）
+            text = text.replace(/^(\s*)[-*+]([^\s])/gm, '$1- $2');
+            
+            // 5. 清理DeepSeek可能添加的特殊Unicode字符（零宽空格等）
+            text = text.replace(/[\u200B-\u200D\uFEFF]/g, '');
+            
+            // 6. 修复数学公式：确保$符号前后有空格（避免渲染错误）
+            text = text.replace(/([^\s])(\$[^\$]+\$)([^\s])/g, '$1 $2 $3');
+            
+            // 7. 清理表格中的多余空格（保留表格结构）
+            const lines = text.split('\n');
+            let inTable = false;
+            for (let i = 0; i < lines.length; i++) {
+                if (lines[i].trim().startsWith('|') && lines[i].trim().endsWith('|')) {
+                    inTable = true;
+                    // 清理表格单元格内的多余空格
+                    lines[i] = lines[i].replace(/\|\s+/g, '|').replace(/\s+\|/g, '|');
+                } else if (inTable && lines[i].trim() === '') {
+                    inTable = false;
+                }
+            }
+            text = lines.join('\n');
+            
+            return text.trim();
+        }
+        
+        function convertToMarkdown() {
+            const input = document.getElementById('input').value;
+            if (!input) {
+                document.getElementById('status').innerHTML = '⚠️ 请先粘贴内容';
+                return;
+            }
+            
+            const cleaned = cleanContent(input);
+            const previewDiv = document.getElementById('preview');
+            
+            // 使用marked库渲染预览
+            previewDiv.innerHTML = marked.parse(cleaned);
+            previewDiv.style.display = 'block';
+            
+            document.getElementById('status').innerHTML = '✅ 预览已更新，确认格式无误后点击"转换并复制"';
+        }
+        
+        async function convertAndCopy() {
+            const input = document.getElementById('input').value;
+            if (!input) {
+                document.getElementById('status').innerHTML = '⚠️ 请先粘贴内容';
+                return;
+            }
+            
+            const cleaned = cleanContent(input);
+            
+            try {
+                await navigator.clipboard.writeText(cleaned);
+                document.getElementById('status').innerHTML = '✅ 已复制到剪贴板！现在可以直接粘贴到Obsidian了（Ctrl+V）';
+                document.getElementById('preview').style.display = 'none';
+            } catch (err) {
+                // 降级方案：使用textarea手动复制
+                const textarea = document.createElement('textarea');
+                textarea.value = cleaned;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                document.getElementById('status').innerHTML = '✅ 已复制到剪贴板（备用方法）！';
+            }
+        }
+        
+        function clearAll() {
+            document.getElementById('input').value = '';
+            document.getElementById('preview').style.display = 'none';
+            document.getElementById('status').innerHTML = '';
+        }
+        
+        // 自动检测粘贴并预览
+        document.getElementById('input').addEventListener('paste', function(e) {
+            setTimeout(() => {
+                convertToMarkdown();
+            }, 100);
+        });
+    </script>
+</body>
+</html>
