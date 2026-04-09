@@ -13,20 +13,22 @@ export default function TwikooCommentCore() {
     initialized.current = true;
 
     // 动态加载 twikoo 的 JS 文件（注意路径使用 dist 版本）
-    import('twikoo/dist/twikoo.min.js').then((module) => {
-      const twikooFn = module.default || module;
-      if (twikooFn && typeof twikooFn.init === 'function'){
-         twikooFn.init({
-          envId: process.env.NEXT_PUBLIC_TWIKOO_ENV_ID, // 你的后端地址
+     // 显式指定使用精简版本
+  import('twikoo/dist/twikoo.min.js')
+    .then((twikooModule) => {
+      const twikoo = twikooModule.default || twikooModule;
+      if (twikoo && typeof twikoo.init === 'function') {
+        twikoo.init({
+          envId: process.env.NEXT_PUBLIC_TWIKOO_ENV_ID!,
           el: commentRef.current,
         });
-      }else {
-        console.error("Twikoo 加载失败：未找到init方法");
+      } else {
+        console.error('Twikoo 模块加载失败或未找到 init 方法', twikoo);
       }
-      })
-      .catch((err) => {
-        console.error('Twikoo 加载失败:', err);
-      });
+    })
+    .catch((err) => {
+      console.error('Twikoo 模块导入错误:', err);
+    });
   }, []);
 
   return <div ref={commentRef} />;
