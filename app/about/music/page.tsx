@@ -7,6 +7,7 @@ import CommentsList from '@/features/comments/components/CommentsList';
 import LikeButton from '@/features/likes/components/LikeButton';
 import VisitCounter from '@/features/visits/components/VisitCounter';
 import CollapsibleComments from '@/components/CollapsibleComments';
+import TwikooComment from '@/components/TwikooComment'
 
 export default function MusicPage() {
   const { togglePlay, isPlaying } = useAudioPlayer();
@@ -30,7 +31,10 @@ export default function MusicPage() {
         <LikeButton slug={pageId} />
       </div>
       {/* 文章内容 */}
-      <article>{/* ... */}</article>
+      <article>
+        {/* ... */}
+        <TwikooComment />
+        </article>
       <CollapsibleComments slug={pageId} />
       <VisitCounter slug={pageId} /> {/* 不占用视觉空间 */}
     </div>

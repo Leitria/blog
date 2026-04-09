@@ -5,6 +5,8 @@ import CommentsList from '@/features/comments/components/CommentsList';
 import LikeButton from '@/features/likes/components/LikeButton';
 import VisitCounter from '@/features/visits/components/VisitCounter';
 import CollapsibleComments from '@/components/CollapsibleComments';
+import TwikooComment from '@/components/TwikooComment'
+
 // 图片列表（实际路径需确保存在）
 const images = Array.from({ length: 11 }, (_, i) => ({
   src: `/images/FabulousBeasts/1/${i + 1}.png`,
@@ -32,7 +34,10 @@ export default function AboutPage() {
               <LikeButton slug={pageId} />
             </div>
             {/* 文章内容 */}
-            <article>{/* ... */}</article>
+            <article>
+              {/* ... */}
+              <TwikooComment />
+              </article>
             <CollapsibleComments slug={pageId} />
             <VisitCounter slug={pageId} /> {/* 不占用视觉空间 */}
           </div>
