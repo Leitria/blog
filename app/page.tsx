@@ -160,6 +160,7 @@ export default function Home() {
     { href: "/about/anatherpages", label: "anatherpages", hint: "杂页" },
     { href: "/about/music", label: "music", hint: "音乐" },
     { href: "/about/pages", label: "page", hint: "博文与日记" },
+    { href: "/about/trick", label: "trick", hint: "wechat trick" },
   ];
 
   return (
