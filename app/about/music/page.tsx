@@ -1,44 +1,23 @@
-// app/music/page.tsx (示例页面)
 'use client';
 
-import { useAudioPlayer } from '@/context/AudioPlayerContext';
-import { useEffect } from 'react';
-import CommentsList from '@/features/comments/components/CommentsList';
-import LikeButton from '@/features/likes/components/LikeButton';
-import VisitCounter from '@/features/visits/components/VisitCounter';
-import CollapsibleComments from '@/components/CollapsibleComments';
-import TwikooComment from '@/components/TwikooComment'
+import MusicExplorer from '@/components/MusicExplorer';
+import { CommentSection } from '@/components/comment-section';
 
 export default function MusicPage() {
-  const { togglePlay, isPlaying } = useAudioPlayer();
-  const pageId = 'music'; // 唯一标识
-  useEffect(() => {
-    // 页面加载时尝试播放
-    if (!isPlaying) {
-      togglePlay();
-    }
-  }, []);
-
   return (
-    <>
-    <div className="p-8">
-      <h1 className="text-2xl">音乐欣赏</h1>
-      <p>正在播放...</p>
-    </div>
-    <div className="max-w-3xl mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Your content</h1>
-        <LikeButton slug={pageId} />
+    <div className="flex min-h-screen flex-col bg-background text-foreground">
+      <div className="mx-auto w-full max-w-3xl flex-1 space-y-8 px-4 py-10">
+        <header className="space-y-1">
+          <h1 className="text-3xl font-bold tracking-tight">音乐欣赏</h1>
+          <p className="text-muted-foreground text-sm leading-relaxed">
+            全局播放器固定在右下角，切换页面不会中断播放。网易云需自建 API 服务；QQ
+            音乐通过官网收听；本机文件仅在本地解码播放。
+          </p>
+        </header>
+
+        <MusicExplorer />
       </div>
-      {/* 文章内容 */}
-      <article>
-        {/* ... */}
-        <TwikooComment />
-        </article>
-      <CollapsibleComments slug={pageId} />
-      <VisitCounter slug={pageId} /> {/* 不占用视觉空间 */}
+      <CommentSection maxWidthClass="max-w-3xl" className="mt-auto" />
     </div>
-    </>
-    
-);
+  );
 }

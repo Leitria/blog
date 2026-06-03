@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import { cn } from '@/lib/utils';
 
 interface BackgroundAnimationProps {
   currentImage: { src: string; alt: string } | null;
@@ -8,67 +9,48 @@ interface BackgroundAnimationProps {
   isAnimating: boolean;
 }
 
-export default function BackgroundAnimation({ currentImage, nextImage, isAnimating }: BackgroundAnimationProps) {
-  // 根据列索引计算图片的 object-position，使每列显示图片的不同部分
-  const getObjectPosition = (col: number) => {
-    // 将图片横向切分为 4 等份，每份居中显示对应区域
-    const percent = (col / 3) * 100; // col=0 → 0%, col=1 → 33.33%, col=2 → 66.66%, col=3 → 100%
-    return `${percent}% center`;
-  };
-
+/** 全幅背景：旧图淡出 + 新图淡入，避免切块滑动带来的割裂感。 */
+export default function BackgroundAnimation({
+  currentImage,
+  nextImage,
+  isAnimating,
+}: BackgroundAnimationProps) {
   return (
-    <div className="fixed inset-0 -z-10 overflow-hidden">
-      {/* 当前背景层（动画中部分列会移出） */}
+    <div className="fixed inset-0 -z-10 overflow-hidden bg-neutral-950">
       {currentImage && (
-        <div className="absolute inset-0 grid grid-cols-4">
-          {[0, 1, 2, 3].map((col) => (
-            <div
-              key={col}
-              className={`h-full w-full relative ${
-                isAnimating && nextImage
-                  ? col === 0 || col === 2
-                    ? 'animate-slideUpOut'
-                    : 'animate-slideDownOut'
-                  : ''
-              }`}
-            >
-              <Image
-                src={currentImage.src}
-                alt={currentImage.alt}
-                fill
-                priority
-                style={{
-                  objectFit: 'cover',
-                  objectPosition: getObjectPosition(col),
-                }}
-              />
-            </div>
-          ))}
+        <div
+          key={currentImage.src}
+          className={cn(
+            'absolute inset-0 transition-[opacity,transform] duration-500 ease-out',
+            isAnimating && nextImage ? 'opacity-0 scale-105' : 'opacity-100 scale-100',
+          )}
+        >
+          <Image
+            src={currentImage.src}
+            alt={currentImage.alt}
+            fill
+            priority
+            className="object-cover blur-[2px]"
+            sizes="100vw"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/70" />
         </div>
       )}
 
-      {/* 下一张背景层（动画中移入） */}
       {nextImage && isAnimating && (
-        <div className="absolute inset-0 grid grid-cols-4">
-          {[0, 1, 2, 3].map((col) => (
-            <div
-              key={col}
-              className={`h-full w-full relative ${
-                col === 0 || col === 2 ? 'animate-slideUpIn' : 'animate-slideDownIn'
-              }`}
-            >
-              <Image
-                src={nextImage.src}
-                alt={nextImage.alt}
-                fill
-                priority
-                style={{
-                  objectFit: 'cover',
-                  objectPosition: getObjectPosition(col),
-                }}
-              />
-            </div>
-          ))}
+        <div
+          key={nextImage.src}
+          className="absolute inset-0 animate-in fade-in zoom-in duration-500 ease-out"
+        >
+          <Image
+            src={nextImage.src}
+            alt={nextImage.alt}
+            fill
+            priority
+            className="object-cover blur-[2px]"
+            sizes="100vw"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-black/70" />
         </div>
       )}
     </div>

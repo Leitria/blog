@@ -3,7 +3,6 @@ import Link from 'next/link';
 import React, { createContext, useContext, useRef, useState, useEffect } from 'react';
 import Typed from 'typed.js';
 import TypingEffect from './components/TypingEffect';
-import CollapsibleComments from '@/components/CollapsibleComments';
 
 // ---------- 音频播放器 Context 定义 ----------
 interface AudioPlayerContextType {
@@ -155,33 +154,73 @@ export function useAudioPlayer() {
 
 // ---------- 主页组件 ----------
 export default function Home() {
+  const links = [
+    { href: "/about", label: "About", hint: "关于" },
+    { href: "/about/FabulousBeasts", label: "Fabulous Beasts", hint: "图集" },
+    { href: "/about/anatherpages", label: "anatherpages", hint: "杂页" },
+    { href: "/about/music", label: "music", hint: "音乐" },
+    { href: "/about/pages", label: "page", hint: "博文与日记" },
+  ];
+
   return (
-    <div className="relative w-full min-h-screen"> 
+    <div className="relative min-h-screen w-full overflow-hidden">
       <div
-        className="absolute inset-0 bg-cover bg-center"
+        className="absolute inset-0 scale-105 bg-cover bg-center motion-safe:animate-[slowPan_40s_ease-in-out_infinite_alternate]"
         style={{ backgroundImage: "url('/images/bg.jpg')" }}
       />
-      <div className="relative z-10 flex flex-col items-center justify-center w-full min-h-screen">
-        <div>
-          <h1>Welcome to Next.js!</h1>
-          <div className="flex gap-15">
-            <Link href="/about">About Us</Link>
-            <Link href="/about/FabulousBeasts">Fabulous Beasts</Link>
-            <Link href="/about/anatherpages">anatherpages</Link>
-            <Link href="/about/music">music</Link>
-          </div>
-        </div>
-        <div
-          className='text-3xl'
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-background/85 via-background/55 to-[#1a1825]/90" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/15 via-transparent to-transparent" />
+
+      <div className="relative z-10 mx-auto flex min-h-screen max-w-3xl flex-col items-center justify-center px-6 py-16 text-center">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-[0.35em] text-primary/90">
+          Third Shire
+        </p>
+        <h1 className="bg-gradient-to-r from-foreground via-foreground to-primary bg-clip-text text-4xl font-bold tracking-tight text-transparent drop-shadow-sm md:text-5xl">
+          Welcome
+        </h1>
+        <p className="mt-3 max-w-md text-sm text-muted-foreground">
+          个人站点入口 · 选一个方向继续浏览
+        </p>
+
+        <nav className="mt-10 flex flex-wrap items-center justify-center gap-3">
+          {links.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="group rounded-2xl border border-border/60 bg-card/40 px-5 py-3 text-sm font-medium text-foreground shadow-sm backdrop-blur-md transition hover:border-primary/50 hover:bg-card/70 hover:shadow-md"
+            >
+              <span className="block">{item.label}</span>
+              <span className="mt-0.5 block text-xs font-normal text-muted-foreground group-hover:text-foreground/80">
+                {item.hint}
+              </span>
+            </Link>
+          ))}
+        </nav>
+
+        <p
+          className="mt-14 max-w-lg text-2xl leading-relaxed text-foreground/95 md:text-3xl"
           style={{
-            fontFamily: '楷体，华文楷体',
-            textShadow: 'rgba(0, 0, 0, 0.5) 1px 1px 3px'
+            fontFamily: "KaiTi, STKaiti, serif",
+            textShadow: "0 2px 24px rgba(0,0,0,0.45)",
           }}
         >
           世人万千，再难遇我
+        </p>
+        <div className="mt-6 w-full max-w-xl">
+          <TypingEffect />
         </div>
-        <TypingEffect />
       </div>
+
+      <style jsx>{`
+        @keyframes slowPan {
+          0% {
+            transform: scale(1.08) translate(0, 0);
+          }
+          100% {
+            transform: scale(1.12) translate(-1.5%, -1%);
+          }
+        }
+      `}</style>
     </div>
   );
 }

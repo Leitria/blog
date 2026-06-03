@@ -4,13 +4,20 @@ interface UseCarouselProps {
   totalSlides: number;
   autoPlayInterval?: number;
   animationDuration?: number;
+  /** 默认是否自动轮播 */
+  defaultAutoPlay?: boolean;
 }
 
-export function useCarousel({ totalSlides, autoPlayInterval = 3000, animationDuration = 600 }: UseCarouselProps) {
+export function useCarousel({
+  totalSlides,
+  autoPlayInterval = 3000,
+  animationDuration = 500,
+  defaultAutoPlay = true,
+}: UseCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [nextIndex, setNextIndex] = useState<number | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(defaultAutoPlay);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const triggerTransition = (nextIdx: number) => {

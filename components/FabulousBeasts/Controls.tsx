@@ -1,7 +1,5 @@
 'use client';
 
-import { useCarousel } from '@/hooks/useCarousel';
-
 interface ControlsProps {
   totalSlides: number;
   currentIndex: number;

@@ -4,3 +4,7 @@ declare module 'twikoo/dist/twikoo.min.js' {
   const twikoo: any;
   export default twikoo;
 }
+//扩展全局window 接口
+interface Window{
+  twikoo:any;
+}
