@@ -1,3 +1,4 @@
+'use client';
 import { useState, useEffect } from 'react';
 
 export default function PrankPage() {
@@ -32,13 +33,17 @@ export default function PrankPage() {
         window.location.href = 'https://www.baidu.com';
       }, 100);
     } else {
-      setError('不对哦，再想想？');
+      setError('叫爸爸');
+      if (inputValue === '就不'){
+        setError('行啊，挺有骨气');
+      }
     }
   };
 
   return (
     <div style={styles.container}>
-      <h1 style={styles.title}>😜 儿童节快乐！</h1>
+      <h1 style={styles.title}>😜 你好呀，来自远方的朋友</h1>
+      <h1 style={styles.title}>这是为你准备的惊喜，请输入“我要礼物”</h1>
       <p style={styles.description}>
         这是一个小小的整蛊页面，试试点下面的按钮？
       </p>
@@ -49,18 +54,18 @@ export default function PrankPage() {
       {showModal && (
         <div style={styles.modalOverlay}>
           <div style={styles.modal}>
-            <h3>请输入退出密码</h3>
+            <h3>嘿嘿</h3>
             <input
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              placeholder="输入内容..."
+              placeholder="嘿嘿..."
               style={styles.input}
               autoFocus
             />
             {error && <p style={styles.error}>{error}</p>}
             <button style={styles.modalButton} onClick={handleConfirm}>
-              验证
+              一键领取！
             </button>
           </div>
         </div>
@@ -115,14 +120,14 @@ const styles = {
     width: '100%',
     padding: '8px',
     margin: '15px 0',
-    border: '1px solid #ddd',
+    border: '1px solid #f0f0f0',
     borderRadius: '4px',
     fontSize: '1rem',
   },
   error: { color: 'red', margin: '5px 0' },
   modalButton: {
     padding: '8px 16px',
-    backgroundColor: '#4caf50',
+    backgroundColor: '#1461de',
     color: 'white',
     border: 'none',
     borderRadius: '4px',
